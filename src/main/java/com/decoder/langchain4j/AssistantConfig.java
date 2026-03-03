@@ -24,10 +24,10 @@ public class AssistantConfig {
     }
 
     @Bean
-    public AssistantAiService assistant(GoogleAiGeminiChatModel model) {
+    public AssistantAiService assistant(GoogleAiGeminiChatModel model, AssistantTools assistantTools) {
         return AiServices.builder(AssistantAiService.class)
                 .chatModel(model)
-                // .tools(assistantTools)
+                .tools(assistantTools)
                 .build();
     }
 }
