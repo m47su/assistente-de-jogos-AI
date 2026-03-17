@@ -1,0 +1,178 @@
+@font-face {
+  font-family: "Minecraft";
+  src: url("/fonts/Minecraftia.ttf") format("truetype");
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #a8b49f;
+  font-family: "Minecraft", monospace;
+  color: #49654f;
+}
+
+.page {
+  width: 100%;
+  min-height: 100vh;
+  padding: 14px 18px 18px 14px;
+  display: flex;
+  flex-direction: column;
+}
+
+.top-back {
+  font-size: 15px;
+  color: #4f6c56;
+  margin-bottom: 8px;
+}
+
+.content {
+  display: flex;
+  align-items: stretch;
+  gap: 14px;
+  flex: 1;
+}
+
+.left-icons {
+  width: 52px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+}
+
+.circle-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: none;
+  background: #eef0ea;
+  color: #57735b;
+  font-size: 18px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.circle-btn:hover {
+  background: #d9dfd4;
+}
+
+.sidebar-card {
+  width: 260px;
+  min-width: 260px;
+  height: auto;
+  background: #d8ddd6;
+  border-radius: 34px;
+  padding: 22px 16px 18px 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-title {
+  text-align: center;
+  font-size: 13px;
+  color: #47634e;
+  margin-bottom: 26px;
+}
+
+.game-name {
+  font-size: 11px;
+  color: #47634e;
+  margin-bottom: 10px;
+}
+
+.new-chat-btn {
+  width: 100%;
+  height: 30px;
+  border: none;
+  border-radius: 9px;
+  background: #d87d3d;
+  color: #f7f3ec;
+  font-family: "Minecraft", monospace;
+  font-size: 10px;
+  cursor: pointer;
+  margin-bottom: 18px;
+}
+
+.recent-title {
+  font-size: 10px;
+  color: #47634e;
+  margin-bottom: 12px;
+}
+
+.recent-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.recent-item {
+  width: 100%;
+  height: 28px;
+  border: none;
+  border-radius: 9px;
+  background: #f2f1ee;
+  cursor: pointer;
+}
+
+.chat-card {
+  flex: 1;
+  height: auto;
+  min-height: 400px;
+  background: #d8ddd6;
+  border-radius: 34px;
+  padding: 20px 18px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.brand-title {
+  text-align: center;
+  font-size: 14px;
+  color: #47634e;
+  font-weight: normal;
+  margin-top: 2px;
+}
+
+.chat-space {
+  flex: 1;
+}
+
+.chat-input-wrap {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chat-input {
+  flex: 1;
+  height: 30px;
+  border: none;
+  outline: none;
+  border-radius: 10px;
+  background: #f2f1ee;
+  padding: 0 14px;
+  font-family: "Minecraft", monospace;
+  font-size: 8px;
+  color: #5b735d;
+}
+
+.chat-input::placeholder {
+  color: #6c7f6b;
+}
+
+.send-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: #4f6c56;
+  font-size: 17px;
+  cursor: pointer;
+}

@@ -1,0 +1,10 @@
+com\decoder\langchain4j\AssistantConfig.class
+com\decoder\langchain4j\ReminderRepository.class
+com\decoder\langchain4j\Langchain4jApplication.class
+com\decoder\langchain4j\AssistantTools.class
+com\decoder\langchain4j\AssistantController.class
+com\decoder\langchain4j\AssistantAiService.class
+com\decoder\langchain4j\AssistantRequest.class
+com\decoder\langchain4j\ChatMessageRepository.class
+com\decoder\langchain4j\ReminderEntity.class
+com\decoder\langchain4j\ChatMessageEntity.class
