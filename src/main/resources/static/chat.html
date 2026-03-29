@@ -1,260 +1,656 @@
 <!doctype html>
-<html lang="pt-br">
+<html lang="pt-BR">
   <head>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <meta charset="UTF-8" />
-    <title>Wiki AI Chat</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vale das Estrelas IA</title>
     <style>
+      :root {
+        --sky-1: #72b7ff;
+        --sky-2: #dff1ff;
+        --wood-dark: #7a431f;
+        --wood: #9f5d2f;
+        --wood-light: #c9894f;
+        --paper: #f5e1b8;
+        --paper-2: #eed2a0;
+        --ink: #4f2d18;
+        --panel-shadow: #623314;
+        --blue-msg: #d9e7f5;
+        --user-msg: #f4dfb6;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
       body {
-        background: #0a0b1e;
-        color: white;
-        font-family: "Inter", sans-serif;
-        display: flex;
-        height: 100vh;
+        width: 100%;
+        height: 100%;
         margin: 0;
-        font-family:
-          "Segoe UI Emoji", "Segoe UI Symbol", "Apple Color Emoji", sans-serif;
-      }
-      /* Sidebar estilo Gemini */
-      .sidebar {
-        width: 260px;
-        background: #050510;
-        border-right: 1px solid #1a1b3a;
-        display: flex;
-        flex-direction: column;
-        padding: 20px;
-      }
-      .history-item {
-        padding: 10px;
-        border-radius: 8px;
-        font-size: 14px;
-        color: #aaa;
-        cursor: pointer;
-        margin-bottom: 5px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      .history-item:hover {
-        background: #1a1b3a;
-        color: white;
       }
 
-      /* Área Principal */
-      .main {
-        flex: 1;
+      body {
+        font-family: "Trebuchet MS", "Verdana", sans-serif;
+        color: var(--ink);
+        background:
+          radial-gradient(circle, rgba(255, 255, 255, 0.9) 1px, transparent 2px)
+            0 0 / 100px 100px,
+          radial-gradient(
+              circle,
+              rgba(255, 255, 255, 0.6) 1.5px,
+              transparent 3px
+            )
+            50px 50px / 140px 140px,
+          radial-gradient(circle, rgba(255, 255, 255, 0.4) 2px, transparent 4px)
+            25px 25px / 180px 180px,
+          linear-gradient(to bottom, #082567 0%, #1e5ecf 50%, #6ec1ff 100%);
+      }
+
+      .app {
+        width: 100%;
+        height: 100vh;
+        padding: 18px;
+      }
+
+      .layout {
+        width: 100%;
+        height: 100%;
         display: flex;
-        flex-direction: column;
+        gap: 18px;
+      }
+
+      .sidebar,
+      .chat-shell {
         position: relative;
+        background: linear-gradient(to bottom, var(--wood-light), var(--wood));
+        border: 4px solid var(--wood-dark);
+        box-shadow: 0 8px 0 var(--panel-shadow);
+        padding: 14px;
+        border-radius: 14px;
+        min-height: 0;
       }
-      #chat-window {
+
+      .sidebar::before,
+      .chat-shell::before {
+        content: "";
+        position: absolute;
+        width: 26px;
+        height: 26px;
+        background: radial-gradient(circle at 30% 30%, #88b954, #4d6f2f);
+        border-radius: 0 18px 0 18px;
+        top: -10px;
+      }
+
+      .sidebar::before {
+        left: 14px;
+      }
+
+      .chat-shell::before {
+        right: 14px;
+      }
+
+      .sidebar {
+        width: 290px;
+        flex-shrink: 0;
+      }
+
+      .chat-shell {
         flex: 1;
-        overflow-y: auto;
-        padding: 40px 20%;
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
       }
 
-      /* Balões de Chat */
-      .message {
-        max-width: 80%;
-        padding: 15px;
-        border-radius: 15px;
-        line-height: 1.5;
-      }
-      .message p {
-        margin: 5px 0;
-      }
-      .message ul,
-      .message ol {
-        padding-left: 20px;
-      }
-      .user {
-        align-self: flex-end;
-        background: #4b1d8d;
-        color: white;
-        border-bottom-right-radius: 2px;
-      }
-      .ai {
-        align-self: flex-start;
-        background: #1a1b3a;
-        border-bottom-left-radius: 2px;
+      .sidebar-inner,
+      .chat-inner {
+        height: 100%;
+        background: linear-gradient(to bottom, var(--paper), var(--paper-2));
+        border: 4px solid #8a5227;
+        border-radius: 10px;
+        padding: 16px;
       }
 
-      /* Barra de Input */
-      .input-area {
-        padding: 20px 20%;
-        background: #0a0b1e;
-      }
-      .input-box {
-        background: #1a1b3a;
-        border-radius: 25px;
-        padding: 15px 25px;
-        display: flex;
-        border: 1px solid #2d2d4d;
-      }
-      input {
-        background: none;
-        border: none;
-        color: white;
-        flex: 1;
-        outline: none;
-        font-size: 16px;
-      }
-      button {
-        background: none;
-        border: none;
-        cursor: pointer;
-        font-size: 20px;
-        color: #7d5fff;
-      }
-
-      .thinking {
-        font-style: italic;
-        color: #7d5fff;
-        opacity: 0.7;
-        animation: pulse 1.5s infinite;
-      }
-
-      @keyframes pulse {
-        0% {
-          opacity: 0.4;
-        }
-        50% {
-          opacity: 1;
-        }
-        100% {
-          opacity: 0.4;
-        }
-      }
-      .suggestion-box {
-        margin-top: 20px;
+      .sidebar-inner {
         display: flex;
         flex-direction: column;
         gap: 10px;
       }
-      .suggestion-btn {
-        background: rgba(125, 95, 255, 0.1);
-        border: 1px border #4b1d8d;
-        color: #ccc;
-        padding: 8px;
-        border-radius: 5px;
-        font-size: 12px;
-        cursor: pointer;
-        text-align: left;
-        transition: 0.3s;
+
+      .brand-box {
+        background: linear-gradient(to bottom, #b67438, #8f5529);
+        border: 4px solid var(--wood-dark);
+        border-radius: 12px;
+        padding: 14px;
+        text-align: center;
+        color: #ffe4b4;
+        text-shadow: 2px 2px 0 #5c2b12;
+        font-size: 1.7rem;
+        font-weight: 900;
+        margin-bottom: 6px;
+        line-height: 1.05;
+        box-shadow: 0 5px 0 var(--panel-shadow);
       }
-      .suggestion-btn:hover {
-        background: #4b1d8d;
-        color: white;
+
+      .back-btn,
+      .new-chat-btn {
+        width: 100%;
+        min-height: 50px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 8px 12px;
+        font-size: 1.1rem;
+        font-weight: 900;
+        border-radius: 10px;
+        border: 3px solid var(--wood-dark);
+        box-shadow: 0 4px 0 var(--panel-shadow);
+        color: #3f220f;
+        cursor: pointer;
+        text-decoration: none;
+      }
+
+      .back-btn {
+        background: linear-gradient(to bottom, #d99d5f, #c57b37);
+      }
+
+      .new-chat-btn {
+        background: rgba(255, 244, 214, 0.75);
+      }
+
+      .sidebar-section-title {
+        margin: 6px 4px 0;
+        font-size: 1.25rem;
+        font-weight: 900;
+        color: var(--ink);
+      }
+
+      .history-list {
+        min-height: 80px;
+        max-height: 160px;
+        overflow-y: auto;
+        padding-right: 4px;
+      }
+
+      .history-item {
+        padding: 6px 8px;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        color: rgba(79, 45, 24, 0.9);
+        cursor: pointer;
+        margin-bottom: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .history-item:hover {
+        background: rgba(157, 93, 47, 0.12);
+      }
+
+      .memo-card,
+      .input-wrap,
+      .send-btn,
+      .message {
+        background: rgba(255, 244, 214, 0.75);
+      }
+
+      .memo-card {
+        border: 4px solid #8d5428;
+        border-radius: 12px;
+        padding: 16px;
+        box-shadow: 0 4px 0 rgba(98, 51, 20, 0.8);
+        flex: 1;
+        min-height: 0;
+      }
+
+      .memo-title {
+        font-size: 1.6rem;
+        font-weight: 900;
+        margin-bottom: 10px;
+      }
+
+      .empty-state {
+        min-height: 180px;
+        height: calc(100% - 40px);
+        display: grid;
+        place-items: center;
+        text-align: center;
+        color: rgba(79, 45, 24, 0.8);
+        font-size: 1.35rem;
+        font-weight: 700;
+        line-height: 1.4;
+        background: rgba(255, 255, 255, 0.15);
+        border: 3px dashed rgba(122, 67, 31, 0.35);
+        border-radius: 12px;
+        padding: 20px;
+        overflow-y: auto;
+      }
+
+      .chat-inner {
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        gap: 14px;
+        min-height: 0;
+      }
+
+      .chat-header {
+        padding: 12px 16px 18px;
+        border-bottom: 4px solid rgba(141, 84, 40, 0.35);
+      }
+
+      .chat-header h1 {
+        margin: 0;
+        font-size: clamp(2rem, 3vw, 3.2rem);
+        line-height: 1.15;
+        text-align: center;
+        font-weight: 900;
+      }
+
+      .messages {
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding-right: 6px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        min-height: 0;
+      }
+
+      .messages::-webkit-scrollbar,
+      .empty-state::-webkit-scrollbar,
+      .history-list::-webkit-scrollbar {
+        width: 10px;
+      }
+
+      .messages::-webkit-scrollbar-thumb,
+      .empty-state::-webkit-scrollbar-thumb,
+      .history-list::-webkit-scrollbar-thumb {
+        background: #b67a45;
+        border-radius: 999px;
+        border: 2px solid #f3ddb5;
+      }
+
+      .row {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+      }
+
+      .row.user {
+        justify-content: flex-end;
+      }
+
+      .avatar {
+        flex: 0 0 54px;
+        width: 54px;
+        height: 54px;
+        border-radius: 10px;
+        border: 3px solid var(--wood-dark);
+        display: grid;
+        place-items: center;
+        font-size: 1.5rem;
+        box-shadow: 0 3px 0 var(--panel-shadow);
+        background: linear-gradient(to bottom, #d59f63, #b9783d);
+      }
+
+      .avatar.ai {
+        background: linear-gradient(to bottom, #cda56d, #b67743);
+      }
+
+      .avatar.user {
+        background: linear-gradient(to bottom, #f0b47a, #d98e4e);
+      }
+
+      .message {
+        max-width: 78%;
+        padding: 18px 20px;
+        font-size: 1.5rem;
+        line-height: 1.45;
+        border: 4px solid var(--wood-dark);
+        box-shadow:
+          inset 0 0 0 3px rgba(255, 255, 255, 0.12),
+          0 6px 0 var(--panel-shadow);
+        border-radius: 10px;
+      }
+
+      .message.ai {
+        background: var(--blue-msg);
+      }
+
+      .message.user {
+        background: var(--user-msg);
+      }
+
+      .thinking {
+        font-style: italic;
+        opacity: 0.8;
+      }
+
+      .message ul {
+        margin: 10px 0 0 24px;
+        padding: 0;
+      }
+
+      .message li + li {
+        margin-top: 4px;
+      }
+
+      .composer {
+        display: grid;
+        grid-template-columns: 1fr 170px;
+        gap: 12px;
+      }
+
+      .input-wrap {
+        display: flex;
+        align-items: center;
+        padding: 0 18px;
+        min-height: 84px;
+        border: 4px solid var(--wood-dark);
+        box-shadow:
+          inset 0 0 0 3px rgba(255, 255, 255, 0.12),
+          0 6px 0 var(--panel-shadow);
+        border-radius: 10px;
+      }
+
+      .input-wrap input {
+        width: 100%;
+        border: 0;
+        outline: 0;
+        background: transparent;
+        font-size: 1.7rem;
+        color: var(--ink);
+        font-family: inherit;
+        font-weight: 700;
+      }
+
+      .input-wrap input::placeholder {
+        color: rgba(79, 45, 24, 0.55);
+      }
+
+      .send-btn {
+        min-height: 84px;
+        border: 4px solid var(--wood-dark);
+        box-shadow:
+          inset 0 0 0 3px rgba(255, 255, 255, 0.12),
+          0 6px 0 var(--panel-shadow);
+        border-radius: 10px;
+        background: linear-gradient(to bottom, #df9e42, #ca7e2a);
+        color: #4c260f;
+        font-size: 1.7rem;
+        font-weight: 900;
+        cursor: pointer;
+      }
+
+      .hint {
+        text-align: left;
+        font-size: 1.15rem;
+        font-weight: 700;
+        padding: 8px 4px 0;
+        color: rgba(79, 45, 24, 0.88);
+      }
+
+      .reminder-item {
+        width: 100%;
+        text-align: left;
+        padding: 8px 0;
+        border-bottom: 1px dashed rgba(122, 67, 31, 0.25);
+      }
+
+      @media (max-width: 860px) {
+        body {
+          overflow: auto;
+        }
+
+        .app {
+          min-height: 100vh;
+          height: auto;
+          padding: 8px;
+        }
+
+        .layout {
+          flex-direction: column;
+          height: auto;
+          gap: 10px;
+        }
+
+        .sidebar {
+          width: 100%;
+          padding: 8px;
+        }
+
+        .sidebar-inner {
+          height: auto;
+          padding: 10px;
+          gap: 8px;
+        }
+
+        .sidebar-section-title,
+        .history-list,
+        .memo-card {
+          display: none;
+        }
+
+        .back-btn,
+        .new-chat-btn {
+          min-height: 42px;
+          font-size: 0.95rem;
+          padding: 6px 10px;
+          margin: 0;
+        }
+
+        .chat-shell {
+          min-height: calc(100vh - 120px);
+          padding: 8px;
+        }
+
+        .chat-inner {
+          gap: 10px;
+          padding: 12px;
+        }
+
+        .chat-header {
+          padding: 8px 8px 12px;
+        }
+
+        .chat-header h1 {
+          font-size: 1.5rem;
+          line-height: 1.2;
+        }
+
+        .messages {
+          gap: 10px;
+          padding-right: 2px;
+        }
+
+        .row {
+          gap: 8px;
+        }
+
+        .avatar {
+          width: 40px;
+          height: 40px;
+          flex: 0 0 40px;
+        }
+
+        .message {
+          max-width: calc(100% - 50px);
+          font-size: 0.98rem;
+          line-height: 1.35;
+          padding: 10px 12px;
+        }
+
+        .composer {
+          grid-template-columns: 1fr;
+          gap: 8px;
+        }
+
+        .input-wrap {
+          min-height: 54px;
+          padding: 0 12px;
+        }
+
+        .input-wrap input {
+          font-size: 1rem;
+        }
+
+        .send-btn {
+          min-height: 50px;
+          font-size: 1.1rem;
+        }
+
+        .hint {
+          font-size: 0.9rem;
+          padding-top: 2px;
+        }
       }
     </style>
   </head>
   <body>
-    <div class="sidebar">
-      <button
-        onclick="window.location.href = 'index.html'"
-        style="
-          color: white;
-          background: none;
-          border: 1px solid #4b1d8d;
-          border-radius: 5px;
-          cursor: pointer;
-          margin-bottom: 20px;
-        "
-      >
-        ← Voltar
-      </button>
-      <h3 id="game-title" style="color: #7d5fff; margin-bottom: 20px">Mundo</h3>
-      <button
-        onclick="startNewChat()"
-        style="
-          width: 100%;
-          background: #4b1d8d;
-          color: white;
-          padding: 10px;
-          border: none;
-          border-radius: 5px;
-          cursor: pointer;
-          margin-bottom: 10px;
-          font-size: 1rem;
-          text-align: center;
-        "
-      >
-        + Nova Conversa
-      </button>
-      <div
-        class="suggestion-box"
-        id="suggestions"
-        style="margin-top: 30px"
-      ></div>
+    <div class="app">
+      <div class="layout">
+        <aside class="sidebar">
+          <div class="sidebar-inner">
+            <a class="back-btn" href="index.html">Voltar</a>
 
-      <div class="sidebar-section">
-        <p style="font-size: 12px; color: #7d5fff; font-weight: bold">
-          CONVERSAS RECENTES
-        </p>
-        <div id="history-list"></div>
-      </div>
+            <button class="new-chat-btn" type="button" onclick="startNewChat()">
+              Novo chat
+            </button>
 
-      <div class="sidebar-section" style="margin-top: 30px">
-        <p style="font-size: 12px; color: #ff9f43; font-weight: bold">
-          🔔 LEMBRETES
-        </p>
-        <div id="reminders-list" style="font-size: 13px; color: #ccc"></div>
-      </div>
-    </div>
+            <div class="sidebar-section-title">Conversas recentes</div>
+            <div class="history-list" id="history-list"></div>
 
-    <div class="main">
-      <div id="chat-window"></div>
-      <div class="input-area">
-        <div class="input-box">
-          <input
-            type="text"
-            id="user-input"
-            placeholder="Pergunte algo à Wiki..."
-          />
-          <button onclick="sendMessage()">➤</button>
-        </div>
+            <div class="memo-card">
+              <div class="memo-title">📜 Lembretes</div>
+              <div class="empty-state" id="reminders-list">
+                <div>
+                  <div style="font-size: 2rem; margin-bottom: 8px">🌱</div>
+                  Ainda nenhum lembrete
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <main class="chat-shell">
+          <div class="chat-inner">
+            <div class="chat-header">
+              <h1 id="chat-title">Como posso te ajudar hoje?</h1>
+            </div>
+
+            <section class="messages" id="chat-window"></section>
+
+            <div>
+              <div class="composer">
+                <label class="input-wrap">
+                  <input
+                    type="text"
+                    id="user-input"
+                    placeholder="Digite sua mensagem..."
+                  />
+                </label>
+                <button class="send-btn" type="button" onclick="sendMessage()">
+                  Enviar
+                </button>
+              </div>
+              <div class="hint" id="chat-hint">
+                Dica: pergunte sobre culturas, clima, pesca, mineração e mais.
+              </div>
+            </div>
+          </div>
+        </main>
       </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
       let currentSessionId =
         localStorage.getItem("chatSessionId") || crypto.randomUUID();
       localStorage.setItem("chatSessionId", currentSessionId);
-      let chatSessionsData = {};
 
-      const selectedGame = localStorage.getItem("selectedGame");
-      if (!selectedGame) window.location.href = "index.html";
-      document.getElementById("game-title").innerText = selectedGame;
+      const selectedGame = (
+        localStorage.getItem("selectedGame") || "stardew"
+      ).toLowerCase();
+
+      const gameConfig = {
+        stardew: {
+          title: "Como posso te ajudar hoje, fazendeiro?",
+          hint: "Dica: pergunte sobre plantações, estações, pesca, mineração e aldeões.",
+          userIcon: "images/stardew.avif",
+          aiIcon: "images/galinha.png",
+        },
+        minecraft: {
+          title: "Como posso te ajudar hoje, minerador?",
+          hint: "Dica: pergunte sobre crafting, biomas, mineração, redstone e sobrevivência.",
+          userIcon: "images/steve.jpg",
+          aiIcon: "images/creeper.jpg",
+        },
+        terraria: {
+          title: "Como posso te ajudar hoje, aventureiro?",
+          hint: "Dica: pergunte sobre biomas, chefes, crafting, mineração e progressão.",
+          userIcon: "images/terrariahum.png",
+          aiIcon: "images/terrariaia.png",
+        },
+      };
+      function getIcons() {
+        return gameConfig[selectedGame] || gameConfig.stardew;
+      }
+
+      function applyGameTexts() {
+        const config = gameConfig[selectedGame] || gameConfig.stardew;
+        const title = document.getElementById("chat-title");
+        const hint = document.getElementById("chat-hint");
+
+        if (title) title.textContent = config.title;
+        if (hint) hint.textContent = config.hint;
+      }
 
       function startNewChat() {
         currentSessionId = crypto.randomUUID();
         localStorage.setItem("chatSessionId", currentSessionId);
-        document.getElementById("chat-window").innerHTML = "";
+
+        const chatWindow = document.getElementById("chat-window");
+        const input = document.getElementById("user-input");
+
+        if (chatWindow) {
+          chatWindow.innerHTML = "";
+        }
+
+        if (input) {
+          input.value = "";
+          input.focus();
+        }
+
         loadHistory();
+        loadReminders();
       }
 
       async function sendMessage() {
         const input = document.getElementById("user-input");
-        const message = input.value;
+        const chatWindow = document.getElementById("chat-window");
+
+        if (!input || !chatWindow) return;
+
+        const message = input.value.trim();
         if (!message) return;
 
         addMessageToChat("user", message);
         input.value = "";
 
-        const chatWindow = document.getElementById("chat-window");
-        const thinkingBubble = document.createElement("div");
-        thinkingBubble.className = "message ai thinking";
-        thinkingBubble.innerText = "Pensando...";
-        chatWindow.appendChild(thinkingBubble);
+        const thinkingRow = document.createElement("div");
+        thinkingRow.className = "row";
+        thinkingRow.innerHTML = `
+                <div class="avatar ai">🤖</div>
+                <div class="message ai thinking">Pensando...</div>
+              `;
+        chatWindow.appendChild(thinkingRow);
         chatWindow.scrollTop = chatWindow.scrollHeight;
 
         try {
           const response = await fetch("/api/assistant", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json",
+            },
             body: JSON.stringify({
               game: selectedGame,
               message: message,
@@ -262,108 +658,129 @@
             }),
           });
 
-          thinkingBubble.remove();
+          if (!response.ok) {
+            throw new Error("Erro na resposta do servidor");
+          }
+
           const text = await response.text();
+          thinkingRow.remove();
           addMessageToChat("ai", text);
-          loadReminders();
           loadHistory();
+          loadReminders();
         } catch (error) {
-          thinkingBubble.innerText =
-            "Erro ao conectar com a Wiki. Tente novamente!";
+          const thinkingBubble = thinkingRow.querySelector(".message");
+          if (thinkingBubble) {
+            thinkingBubble.textContent =
+              "Erro ao conectar com a IA. Tente novamente!";
+          }
           console.error(error);
         }
       }
 
       function addMessageToChat(type, text) {
-        const win = document.getElementById("chat-window");
-        const div = document.createElement("div");
-        div.className = `message ${type}`;
+        const chatWindow = document.getElementById("chat-window");
+        if (!chatWindow) return;
 
-        div.innerHTML = marked.parse(text);
+        const icons = getIcons();
 
-        win.appendChild(div);
-        win.scrollTop = win.scrollHeight;
-      }
-      // Detecta a tecla Enter no campo de input
-      document
-        .getElementById("user-input")
-        .addEventListener("keydown", function (event) {
-          if (event.key === "Enter") {
-            sendMessage();
-          }
-        });
+        const row = document.createElement("div");
+        row.className = type === "user" ? "row user" : "row";
 
-      async function loadSuggestions() {
-        const box = document.getElementById("suggestions");
-        box.innerHTML =
-          '<p style="font-size: 12px; color: #7d5fff;">Gerando ideias...</p>';
-
-        try {
-          const response = await fetch(
-            `/api/assistant/suggestions?game=${selectedGame}`,
-          );
-          const questions = await response.json();
-
-          box.innerHTML =
-            '<p style="font-size: 12px; color: #7d5fff; margin-bottom: 5px;">Sugestões da IA:</p>';
-          questions.forEach((q) => {
-            const btn = document.createElement("div");
-            btn.className = "suggestion-btn";
-            btn.innerText = q.trim();
-            btn.onclick = () => {
-              document.getElementById("user-input").value = q.trim();
-              sendMessage();
-            };
-            box.appendChild(btn);
-          });
-        } catch (e) {
-          box.innerHTML = "<p>Erro ao carregar sugestões.</p>";
+        if (type === "user") {
+          row.innerHTML = `
+      <div class="message user">${escapeHtml(text)}</div>
+      <div class="avatar user">
+        <img src="${icons.userIcon}" 
+             style="width:100%; height:100%; object-fit:cover; border-radius:8px;">
+      </div>
+    `;
+        } else {
+          row.innerHTML = `
+      <div class="avatar ai">
+        <img src="${icons.aiIcon}" 
+             style="width:100%; height:100%; object-fit:cover; border-radius:8px;">
+      </div>
+      <div class="message ai">${marked.parse(text)}</div>
+    `;
         }
+
+        chatWindow.appendChild(row);
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+      }
+
+      function escapeHtml(text) {
+        const div = document.createElement("div");
+        div.textContent = text;
+        return div.innerHTML;
       }
 
       async function loadHistory() {
-        const res = await fetch(`/api/assistant/history?game=${selectedGame}`);
-        if (!res.ok) return;
-        const data = await res.json();
         const list = document.getElementById("history-list");
+        if (!list) return;
 
-        // Agrupamos as mensagens por sessionId para não repetir na barra lateral
-        const sessions = {};
-        data.forEach((m) => {
-          if (!sessions[m.sessionId]) {
-            sessions[m.sessionId] = m.userMessage; // Usa a 1ª pergunta como título
+        try {
+          const res = await fetch(
+            `/api/assistant/history?game=${encodeURIComponent(selectedGame)}`,
+          );
+          if (!res.ok) return;
+
+          const data = await res.json();
+          const sessions = {};
+
+          data.forEach((m) => {
+            if (!sessions[m.sessionId] && m.userMessage) {
+              sessions[m.sessionId] = m.userMessage;
+            }
+          });
+
+          const sessionIds = Object.keys(sessions);
+
+          if (!sessionIds.length) {
+            list.innerHTML = "";
+            return;
           }
-        });
 
-        list.innerHTML = Object.keys(sessions)
-          .map(
-            (sid) => `
-        <div class="history-item" onclick="loadFullChat('${sid}')" title="${sessions[sid]}">
-            ${sessions[sid]}
-        </div>
-    `,
-          )
-          .join("");
+          list.innerHTML = sessionIds
+            .map(
+              (sid) => `
+                      <div
+                        class="history-item"
+                        onclick="loadFullChat('${sid}')"
+                        title="${escapeHtml(sessions[sid])}"
+                      >
+                        ${escapeHtml(sessions[sid])}
+                      </div>
+                    `,
+            )
+            .join("");
+        } catch (e) {
+          console.error("Erro ao carregar histórico", e);
+        }
       }
 
-      async function loadFullChat(sid) {
-        // Quando clicamos, essa sessão vira a sessão "ativa"
-        currentSessionId = sid;
-        localStorage.setItem("chatSessionId", sid);
+      async function loadFullChat(sessionId) {
+        const chatWindow = document.getElementById("chat-window");
+        if (!chatWindow) return;
 
-        const res = await fetch(
-          `/api/assistant/history/session?sessionId=${sid}`,
-        );
-        const messages = await res.json();
+        currentSessionId = sessionId;
+        localStorage.setItem("chatSessionId", sessionId);
 
-        const win = document.getElementById("chat-window");
-        win.innerHTML =
-          '<p style="text-align:center; color:gray; font-size:10px;">— Conversa Antiga —</p>';
+        try {
+          const res = await fetch(
+            `/api/assistant/history/session?sessionId=${encodeURIComponent(sessionId)}`,
+          );
+          if (!res.ok) return;
 
-        messages.forEach((m) => {
-          addMessageToChat("user", m.userMessage);
-          addMessageToChat("ai", m.aiResponse);
-        });
+          const messages = await res.json();
+          chatWindow.innerHTML = "";
+
+          messages.forEach((m) => {
+            addMessageToChat("user", m.userMessage);
+            addMessageToChat("ai", m.aiResponse);
+          });
+        } catch (e) {
+          console.error("Erro ao carregar conversa completa", e);
+        }
       }
 
       async function loadReminders() {
@@ -372,23 +789,26 @@
 
         try {
           const response = await fetch(
-            `/api/assistant/reminders?game=${selectedGame}`,
+            `/api/assistant/reminders?game=${encodeURIComponent(selectedGame)}`,
           );
+          if (!response.ok) return;
+
           const reminders = await response.json();
 
-          if (reminders.length === 0) {
-            list.innerHTML =
-              '<p style="color:gray; font-size:11px;">Nenhum lembrete salvo.</p>';
+          if (!reminders.length) {
+            list.innerHTML = `
+                    <div>
+                      <div style="font-size: 2rem; margin-bottom: 8px">🌱</div>
+                      Ainda nenhum lembrete
+                    </div>
+                  `;
             return;
           }
 
           list.innerHTML = reminders
             .map(
-              (r) => `
-            <div style="padding: 8px; border-bottom: 1px solid #1a1b3a; font-size: 13px;">
-                • ${r.reminderText}
-            </div>
-        `,
+              (r) =>
+                `<div class="reminder-item">• ${escapeHtml(r.reminderText)}</div>`,
             )
             .join("");
         } catch (e) {
@@ -396,11 +816,17 @@
         }
       }
 
-      //loadSuggestions();
+      document
+        .getElementById("user-input")
+        ?.addEventListener("keydown", function (event) {
+          if (event.key === "Enter") {
+            sendMessage();
+          }
+        });
 
-      loadReminders();
-
+      applyGameTexts();
       loadHistory();
+      loadReminders();
     </script>
   </body>
 </html>
