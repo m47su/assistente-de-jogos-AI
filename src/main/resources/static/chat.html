@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vale das Estrelas IA</title>
+    <title>Junimo.ai</title>
     <style>
       :root {
         --sky-1: #72b7ff;
@@ -726,12 +726,21 @@
 
           const data = await res.json();
           const sessions = {};
+          const savedTitles = JSON.parse(
+            localStorage.getItem("chatTitles") || "{}",
+          );
 
           data.forEach((m) => {
-            if (!sessions[m.sessionId] && m.userMessage) {
-              sessions[m.sessionId] = m.userMessage;
+            if (!savedTitles[m.sessionId] && m.userMessage) {
+              savedTitles[m.sessionId] = m.userMessage;
+            }
+
+            if (!sessions[m.sessionId]) {
+              sessions[m.sessionId] = savedTitles[m.sessionId] || "Novo chat";
             }
           });
+
+          localStorage.setItem("chatTitles", JSON.stringify(savedTitles));
 
           const sessionIds = Object.keys(sessions);
 

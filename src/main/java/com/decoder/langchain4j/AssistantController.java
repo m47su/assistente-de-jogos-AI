@@ -1,7 +1,5 @@
 package com.decoder.langchain4j;
 
-import dev.langchain4j.service.Result;
-
 import java.util.List;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,6 +8,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import dev.langchain4j.service.Result;
 
 @RestController
 @RequestMapping("/api/assistant")
@@ -32,6 +32,44 @@ public String askAssistant(@RequestBody AssistantRequest request) {
     System.out.println("Jogo: " + request.game());
     System.out.println("Mensagem: " + request.message());
     System.out.println("ID da Sessão: " + request.sessionId());
+
+    String originalMessage = request.message();
+    String message = originalMessage.toLowerCase();
+
+    boolean isReminderRequest =
+            message.contains("me lembre") ||
+            message.contains("me lembrar") ||
+            message.contains("lembre de") ||
+            message.contains("lembrar de") ||
+            message.contains("anote") ||
+            message.contains("anotar") ||
+            message.contains("salva isso") ||
+            message.contains("salvar isso") ||
+            message.contains("guarde isso") ||
+            message.contains("guardar isso");
+
+    if (isReminderRequest) {
+    try {
+        ReminderEntity reminder = new ReminderEntity(request.game(), originalMessage);
+        reminderRepository.save(reminder);
+        System.out.println("Lembrete salvo com sucesso: " + originalMessage);
+
+        String aiResponse = "Pronto! Salvei seu lembrete com sucesso.";
+
+        ChatMessageEntity chatLog = new ChatMessageEntity(
+                request.game(),
+                request.message(),
+                aiResponse,
+                request.sessionId());
+        repository.save(chatLog);
+        System.out.println("✓ Conversa salva no banco com ID de Sessão: " + request.sessionId());
+
+        return aiResponse;
+    } catch (Exception e) {
+        System.err.println("❌ ERRO AO SALVAR LEMBRETE: " + e.getMessage());
+        return "Tentei salvar seu lembrete, mas ocorreu um erro.";
+    }
+}
 
     String aiResponse;
     try {
