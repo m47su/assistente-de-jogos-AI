@@ -1,7 +1,8 @@
 package com.decoder.langchain4j;
 
-import dev.langchain4j.agent.tool.Tool;
 import org.springframework.stereotype.Component;
+
+import dev.langchain4j.agent.tool.Tool;
 
 @Component
 public class AssistantTools {
