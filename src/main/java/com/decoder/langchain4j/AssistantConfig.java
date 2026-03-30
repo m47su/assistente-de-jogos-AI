@@ -1,5 +1,7 @@
 package com.decoder.langchain4j;
 
+import dev.langchain4j.memory.chat.ChatMemoryProvider;
+import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.googleai.GoogleAiGeminiChatModel;
 import dev.langchain4j.service.AiServices;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,14 +22,24 @@ public class AssistantConfig {
         return GoogleAiGeminiChatModel.builder()
                 .apiKey(geminiApiKey)
                 .modelName(geminiModel)
+                .logRequestsAndResponses(true)
                 .build();
+    }
+        @Bean
+    public ChatMemoryProvider chatMemoryProvider() {
+        return sessionId -> MessageWindowChatMemory.withMaxMessages(20);
     }
 
     @Bean
-    public AssistantAiService assistant(GoogleAiGeminiChatModel model, AssistantTools assistantTools) {
+    public AssistantAiService assistant(
+            GoogleAiGeminiChatModel model, 
+            AssistantTools assistantTools, 
+            ChatMemoryProvider chatMemoryProvider) { 
+        
         return AiServices.builder(AssistantAiService.class)
                 .chatModel(model)
                 .tools(assistantTools)
+                .chatMemoryProvider(chatMemoryProvider) 
                 .build();
     }
 }
