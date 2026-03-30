@@ -1,6 +1,6 @@
-# 🐔🌾 Games AI Assistant
+# 🐔🌾 Stardew Valley AI Assistant
 
-Um assistente virtual inteligente e interativo feito sob medida para jogadores de **Stardew Valley**, **Minecraft** e **Terraria**! 
+Uma assistente virtual inteligente e interativo feito sob medida para jogadores de **Stardew Valley**, **Minecraft** e **Terraria**! 
 Este projeto utiliza **Java 21**, **Spring Boot** e **LangChain4j** para integrar a API do Google Gemini, criando um guia amigável que responde a dúvidas sobre o jogo, lembra do contexto da conversa e até anota lembretes importantes para o jogador.
 
 ## ✨ O que a IA faz?
@@ -31,3 +31,35 @@ Para rodar este projeto na sua máquina, você precisará ter instalado:
    ```bash
    git clone [https://github.com/m47su/stardew-valley-AI.git](https://github.com/m47su/stardew-valley-AI.git)
    cd stardew-valley-AI
+   ````
+
+2.  **Configure sua API Key:**
+    Abra o arquivo `src/main/resources/application.properties` e adicione sua chave de API do Gemini:
+
+    ```properties
+    gemini.api-key=SUA_CHAVE_API_AQUI
+    gemini.model=gemini-flash-latest
+    ```
+
+3.  **Inicie a aplicação:**
+    Pelo terminal, na raiz do projeto, execute:
+
+    ```bash
+    ./mvnw spring-boot:run
+    ```
+
+    *(No Windows, você pode usar `mvnw.cmd spring-boot:run`)*
+
+4.  **Acesse no navegador:**
+    Abra o seu navegador e acesse: [http://localhost:8083](https://www.google.com/search?q=http://localhost:8083) *(ou a porta configurada no seu console)*.
+
+## 🎮 Como usar
+ * **Selecione a IA que deseja no menu principal:** Terão três opções disponíveis: Stardew Valley, Minecraft e Terraria.
+  * **Chat Livre:** Simplesmente digite sua dúvida, como *"O que a Abigail gosta de ganhar de presente?"* ou *"Como pescar um esturjão?"*.
+  * **Anotar Lembretes:** Diga algo como *"Me lembre de regar as abóboras amanhã de manhã"*. A IA processará o pedido, e o sistema salvará o lembrete automaticamente no banco de dados.
+
+## 📂 Estrutura Principal
+
+  * `AssistantAiService`: Define os *System Prompts* e regras de comportamento da IA.
+  * `AssistantController`: Endpoint REST que faz a ponte entre o frontend e o LangChain4j, interceptando ações (como salvar lembretes em JSON).
+  * `ChatMessageEntity` / `ReminderEntity`: Entidades JPA para persistência de dados no H2.
