@@ -1,4 +1,4 @@
-# 🐔🌾 Stardew Valley AI Assistant
+# 🐔🌾 Games AI Assistant
 
 Uma assistente virtual inteligente e interativo feito sob medida para jogadores de **Stardew Valley**, **Minecraft** e **Terraria**! 
 Este projeto utiliza **Java 21**, **Spring Boot** e **LangChain4j** para integrar a API do Google Gemini, criando um guia amigável que responde a dúvidas sobre o jogo, lembra do contexto da conversa e até anota lembretes importantes para o jogador.
