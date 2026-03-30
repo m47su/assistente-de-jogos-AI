@@ -31,8 +31,8 @@ Para rodar este projeto na sua máquina, você precisará ter instalado:
 
 1. **Clone o repositório:**
    ```bash
-   git clone [https://github.com/m47su/stardew-valley-AI.git](https://github.com/m47su/stardew-valley-AI.git)
-   cd stardew-valley-AI
+   git clone https://github.com/m47su/assistente-de-jogos-AI.git
+   cd assistente-de-jogos-AI
    ````
 
 2.  **Configure sua API Key:**
