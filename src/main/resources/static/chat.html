@@ -239,7 +239,7 @@
 
       .chat-header h1 {
         margin: 0;
-        font-size: clamp(2rem, 3vw, 3.2rem);
+        font-size: 1.8rem;
         line-height: 1.15;
         text-align: center;
         font-weight: 900;
@@ -303,7 +303,7 @@
       .message {
         max-width: 78%;
         padding: 18px 20px;
-        font-size: 1.5rem;
+        font-size: 1rem;
         line-height: 1.45;
         border: 4px solid var(--wood-dark);
         box-shadow:
@@ -344,7 +344,7 @@
         display: flex;
         align-items: center;
         padding: 0 18px;
-        min-height: 84px;
+        min-height: 60px;
         border: 4px solid var(--wood-dark);
         box-shadow:
           inset 0 0 0 3px rgba(255, 255, 255, 0.12),
@@ -357,7 +357,7 @@
         border: 0;
         outline: 0;
         background: transparent;
-        font-size: 1.7rem;
+        font-size: 1rem;
         color: var(--ink);
         font-family: inherit;
         font-weight: 700;
@@ -368,7 +368,7 @@
       }
 
       .send-btn {
-        min-height: 84px;
+        min-height: 60px;
         border: 4px solid var(--wood-dark);
         box-shadow:
           inset 0 0 0 3px rgba(255, 255, 255, 0.12),
@@ -376,7 +376,7 @@
         border-radius: 10px;
         background: linear-gradient(to bottom, #df9e42, #ca7e2a);
         color: #4c260f;
-        font-size: 1.7rem;
+        font-size: 1rem;
         font-weight: 900;
         cursor: pointer;
       }
@@ -395,7 +395,7 @@
         padding: 8px 0;
         border-bottom: 1px dashed rgba(122, 67, 31, 0.25);
       }
-      /*RESPONSIVIDADE*/
+
       @media (max-width: 860px) {
         body {
           overflow: auto;
@@ -494,8 +494,8 @@
         }
 
         .send-btn {
-          min-height: 50px;
-          font-size: 1.1rem;
+          min-height: 60px;
+          font-size: 1rem;
         }
 
         .hint {
@@ -563,13 +563,20 @@
 
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
-      let currentSessionId =
-        localStorage.getItem("chatSessionId") || crypto.randomUUID();
-      localStorage.setItem("chatSessionId", currentSessionId);
-
+      // 1. PRIMEIRO definimos qual jogo está selecionado
       const selectedGame = (
         localStorage.getItem("selectedGame") || "stardew"
       ).toLowerCase();
+
+      // 2. AGORA criamos a chave de sessão baseada no jogo selecionado
+      const sessionKey = `chatSessionId_${selectedGame}`;
+
+      // 3. E ENTÃO inicializamos o ID da sessão atual
+      let currentSessionId =
+        localStorage.getItem(sessionKey) || crypto.randomUUID();
+
+      localStorage.setItem(sessionKey, currentSessionId);
+      localStorage.setItem("chatSessionId", currentSessionId);
 
       const gameConfig = {
         stardew: {
@@ -591,6 +598,7 @@
           aiIcon: "images/terrariaia.png",
         },
       };
+
       function getIcons() {
         return gameConfig[selectedGame] || gameConfig.stardew;
       }
@@ -606,6 +614,7 @@
 
       function startNewChat() {
         currentSessionId = crypto.randomUUID();
+        localStorage.setItem(`chatSessionId_${selectedGame}`, currentSessionId);
         localStorage.setItem("chatSessionId", currentSessionId);
 
         const chatWindow = document.getElementById("chat-window");
@@ -725,45 +734,37 @@
           if (!res.ok) return;
 
           const data = await res.json();
-          const sessions = {};
           const savedTitles = JSON.parse(
             localStorage.getItem("chatTitles") || "{}",
           );
 
-          data.forEach((m) => {
-            if (!savedTitles[m.sessionId] && m.userMessage) {
-              savedTitles[m.sessionId] = m.userMessage;
-            }
+          list.innerHTML = "";
 
-            if (!sessions[m.sessionId]) {
-              sessions[m.sessionId] = savedTitles[m.sessionId] || "Novo chat";
+          const sessoesProcessadas = new Set();
+
+          data.reverse().forEach((m) => {
+            if (!sessoesProcessadas.has(m.sessionId)) {
+              if (!savedTitles[m.sessionId] && m.userMessage) {
+                savedTitles[m.sessionId] = m.userMessage;
+              }
+
+              const tituloFinal = savedTitles[m.sessionId] || "Nova conversa";
+
+              const item = document.createElement("div");
+              item.className = "history-item";
+              item.textContent = tituloFinal;
+              item.title = tituloFinal;
+              item.onclick = () => loadFullChat(m.sessionId);
+
+              list.appendChild(item);
+
+              sessoesProcessadas.add(m.sessionId);
             }
           });
 
           localStorage.setItem("chatTitles", JSON.stringify(savedTitles));
-
-          const sessionIds = Object.keys(sessions);
-
-          if (!sessionIds.length) {
-            list.innerHTML = "";
-            return;
-          }
-
-          list.innerHTML = sessionIds
-            .map(
-              (sid) => `
-                      <div
-                        class="history-item"
-                        onclick="loadFullChat('${sid}')"
-                        title="${escapeHtml(sessions[sid])}"
-                      >
-                        ${escapeHtml(sessions[sid])}
-                      </div>
-                    `,
-            )
-            .join("");
         } catch (e) {
-          console.error("Erro ao carregar histórico", e);
+          console.error("Erro ao carregar histórico:", e);
         }
       }
 
@@ -773,6 +774,7 @@
 
         currentSessionId = sessionId;
         localStorage.setItem("chatSessionId", sessionId);
+        localStorage.setItem(`chatSessionId_${selectedGame}`, sessionId);
 
         try {
           const res = await fetch(
